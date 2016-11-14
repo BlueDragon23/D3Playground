@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>D3 Playground</title>
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="hbox">
+		<div id="left" class="vbox">
+			<button class="shape" onclick="drawCircle()">Circle</button>
+			<button class="shape" onclick="drawPolygon(6)">Hexagon</button>
+			<button class="shape" onclick="drawPolygon(5)">Pentagon</button>
+			<button class="shape" onclick="drawPolygon(4)">Square</button>
+			<button class="shape" onclick="drawPolygon(3)">Triangle</button>
+		</div>
+		<div id="graph" class="vbox">
+			<h1>Shapes!</h1>
+			<svg>
+				
+			</svg>
+		</div>
+		<div id="right" class="vbox">
+			<button class="colour" onclick="changeColour('red')">Red</button>
+			<button class="colour" onclick="changeColour('yellow')">Yellow</button>
+			<button class="colour" onclick="changeColour('blue')">Blue</button>
+			<button class="colour" onclick="changeColour('green')">Green</button>
+			<button class="colour" onclick="changeColour('black')">Black</button>
+		</div>
+	</div>
+
+	<script>
+		var size = d3.select("svg").node().getBoundingClientRect()['height']/4;
+		var currentColour = "black";
+		var lastDrawn = null;
+
+		window.onresize = function() {
+			size = d3.select("svg").node().getBoundingClientRect()['height']/4;
+			if (lastDrawn != null) {
+				lastDrawn();
+			}
+		}
+
+		function clearScreen() {
+			d3.select("svg").selectAll("*").data([]).exit().remove();
+		}
+
+		function drawCircle() {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("circle");
+			shape.attr('r', function(d) {return d});
+			var space = d3.select("svg").node().getBoundingClientRect();
+			shape.attr('cy', space['height']/2);
+			shape.attr('cx', space['width']/2);
+			shape.style("fill", currentColour);
+			lastDrawn = drawCircle;
+		}
+
+		function drawSquare() {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("rect");
+			shape.attr('width', function(d) {return Math.sqrt(2)*d});
+			shape.attr('height', function(d) {return Math.sqrt(2)*d});
+			var space = d3.select("svg").node().getBoundingClientRect();
+			shape.attr('y', function(d) {return space['height']/2 - Math.sqrt(2)*d/2});
+			shape.attr('x', function(d) {return space['width']/2 - Math.sqrt(2)*d/2});
+			shape.style("fill", currentColour);
+			lastDrawn = drawSquare;
+		}
+
+		function drawTriangle() {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
+			var space = d3.select("svg").node().getBoundingClientRect();
+			var angle = 36*Math.PI/180;
+			shape.attr('points', function(d) {
+				var angle = Math.PI/3;
+				return [[0, d + d*Math.cos(angle)], 
+					[d*Math.sin(angle), 0],
+					[2*d*Math.sin(angle), d + d*Math.cos(angle)]].map(function(point) {
+					return [point[0] + space['width']/2 - d*Math.cos(angle/2), point[1] + space['height']/2 - d];
+				});
+			});
+			shape.style("fill", currentColour);
+			lastDrawn = drawTriangle;
+		}
+
+		function drawHexagon() {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
+			var space = d3.select("svg").node().getBoundingClientRect();
+			shape.attr('points', function(d) {
+				return [[0, d*Math.cos(Math.PI/6)],
+						[d - d*Math.cos(Math.PI/3), 0],
+						[d + d*Math.cos(Math.PI/3), 0],
+						[2*d, d*Math.cos(Math.PI/6)],
+						[d + d*Math.cos(Math.PI/3), 2*d*Math.sin(Math.PI/3)],
+						[d - d*Math.cos(Math.PI/3), 2*d*Math.sin(Math.PI/3)]].map(function(point) {
+					return [point[0] + space['width']/2 - d, point[1] + space['height']/2 - d*Math.cos(Math.PI/6)];
+				});
+			});
+			shape.style("fill", currentColour);
+			lastDrawn = drawHexagon;
+		}
+
+		function drawPentagon() {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
+			var space = d3.select("svg").node().getBoundingClientRect();
+			var angle = 72*Math.PI/180;
+			shape.attr('points', function(d) {
+				return [[d*Math.cos(Math.PI/2 - angle), 0], 
+					[2*d*Math.cos(Math.PI/2 - angle), d - d*Math.sin(Math.PI/2 - angle)],
+					[d*Math.cos(Math.PI/2 - angle) + d*Math.sin(angle/2), d + d*Math.cos(angle/2)],
+					[d*Math.cos(Math.PI/2 - angle) - d*Math.sin(angle/2), d + d*Math.cos(angle/2)],
+					[0, d - d*Math.sin(Math.PI/2 - angle)]].map(function(point) {
+					return [point[0] + space['width']/2 - d*Math.cos(Math.PI/2 - angle), point[1] + space['height']/2 - d];
+				});
+			});
+			shape.style("fill", currentColour);
+			lastDrawn = drawPentagon;
+		}
+
+		function drawPolygon(n) {
+			clearScreen();
+			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
+			var space = d3.select("svg").node().getBoundingClientRect();
+			var angle = 2*Math.PI/n;
+			shape.attr('points', function(d) {
+				path = []
+				for (var i = 0; i < n; i++) {
+					path.push([d*Math.sin(i*angle)+space['width']/2,-d*Math.cos(i*angle)+space['height']/2]);
+				}
+				return path;
+			});
+			shape.style("fill", currentColour);
+		}
+
+		function changeColour(colour) {
+			console.log("Colourising");
+			currentColour = colour;
+			d3.select("svg").selectAll("*").style("fill", colour);
+		}
+	</script>
+</body>
+</html>
