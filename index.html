@@ -54,72 +54,7 @@
 			shape.attr('cy', space['height']/2);
 			shape.attr('cx', space['width']/2);
 			shape.style("fill", currentColour);
-			lastDrawn = drawCircle;
-		}
-
-		function drawSquare() {
-			clearScreen();
-			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("rect");
-			shape.attr('width', function(d) {return Math.sqrt(2)*d});
-			shape.attr('height', function(d) {return Math.sqrt(2)*d});
-			var space = d3.select("svg").node().getBoundingClientRect();
-			shape.attr('y', function(d) {return space['height']/2 - Math.sqrt(2)*d/2});
-			shape.attr('x', function(d) {return space['width']/2 - Math.sqrt(2)*d/2});
-			shape.style("fill", currentColour);
-			lastDrawn = drawSquare;
-		}
-
-		function drawTriangle() {
-			clearScreen();
-			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
-			var space = d3.select("svg").node().getBoundingClientRect();
-			var angle = 36*Math.PI/180;
-			shape.attr('points', function(d) {
-				var angle = Math.PI/3;
-				return [[0, d + d*Math.cos(angle)], 
-					[d*Math.sin(angle), 0],
-					[2*d*Math.sin(angle), d + d*Math.cos(angle)]].map(function(point) {
-					return [point[0] + space['width']/2 - d*Math.cos(angle/2), point[1] + space['height']/2 - d];
-				});
-			});
-			shape.style("fill", currentColour);
-			lastDrawn = drawTriangle;
-		}
-
-		function drawHexagon() {
-			clearScreen();
-			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
-			var space = d3.select("svg").node().getBoundingClientRect();
-			shape.attr('points', function(d) {
-				return [[0, d*Math.cos(Math.PI/6)],
-						[d - d*Math.cos(Math.PI/3), 0],
-						[d + d*Math.cos(Math.PI/3), 0],
-						[2*d, d*Math.cos(Math.PI/6)],
-						[d + d*Math.cos(Math.PI/3), 2*d*Math.sin(Math.PI/3)],
-						[d - d*Math.cos(Math.PI/3), 2*d*Math.sin(Math.PI/3)]].map(function(point) {
-					return [point[0] + space['width']/2 - d, point[1] + space['height']/2 - d*Math.cos(Math.PI/6)];
-				});
-			});
-			shape.style("fill", currentColour);
-			lastDrawn = drawHexagon;
-		}
-
-		function drawPentagon() {
-			clearScreen();
-			var shape = d3.select("svg").selectAll("*").data([size]).enter().append("polygon");
-			var space = d3.select("svg").node().getBoundingClientRect();
-			var angle = 72*Math.PI/180;
-			shape.attr('points', function(d) {
-				return [[d*Math.cos(Math.PI/2 - angle), 0], 
-					[2*d*Math.cos(Math.PI/2 - angle), d - d*Math.sin(Math.PI/2 - angle)],
-					[d*Math.cos(Math.PI/2 - angle) + d*Math.sin(angle/2), d + d*Math.cos(angle/2)],
-					[d*Math.cos(Math.PI/2 - angle) - d*Math.sin(angle/2), d + d*Math.cos(angle/2)],
-					[0, d - d*Math.sin(Math.PI/2 - angle)]].map(function(point) {
-					return [point[0] + space['width']/2 - d*Math.cos(Math.PI/2 - angle), point[1] + space['height']/2 - d];
-				});
-			});
-			shape.style("fill", currentColour);
-			lastDrawn = drawPentagon;
+			lastDrawn = function() {drawCircle()};
 		}
 
 		function drawPolygon(n) {
@@ -135,6 +70,7 @@
 				return path;
 			});
 			shape.style("fill", currentColour);
+			lastDrawn = function() {drawPolygon(n)};
 		}
 
 		function changeColour(colour) {
