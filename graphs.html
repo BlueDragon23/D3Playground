@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>D3 Playground Graphs</title>
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="hbox">
+		<div class="vbox" style="position:absolute;left:25vw;">
+			<h1>CHARTS</h1>
+			<svg ></svg>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		// Generate random data to display
+		var data;
+		function generateData() {
+			data = []
+			size = Math.ceil(Math.random() * 15) + 5; // between 5 and 20 data points 
+			for (var i = 0; i < size; i++) {
+				data.push([Math.random() * 10, Math.random() * 10]);
+			}
+		}
+
+		function modifyData() {
+			size = Math.ceil(Math.random() * 15) + 5;
+			if (size <= data.size) {
+				for (var i = 0; i < data.size - size; i++) {
+					data.pop();
+				}
+			} else {
+				for (var i = 0; i < size - data.size; i++) {
+					data.push([Math.random() * 10, Math.random() * 10]);
+				}
+			}
+		}
+
+		var scaling = 20;
+		function update() {
+			var circles = d3.select("svg").selectAll("circle").data(data);
+			circles.enter().append("circle")
+				.attr('cx', function(d) {return scaling*d[0] + 30})
+				.attr('cy', function(d) {return scaling*d[1] + 30})
+				.attr('r', scaling/2);
+			circles.exit().remove();
+			var axis = d3.axisLeft(d3.scaleLinear().domain([1, 10]).range([1, 10])).ticks(10);
+			d3.select("svg").attr("width", scaling*data.reduce(function (max, point) {return Math.max(max, point[0])}, 0) + 120)
+							.attr("height", scaling*data.reduce(function (max, point) {return Math.max(max, point[1])}, 0) + 60)
+							.append("g")
+							.attr("transform", "translate(30, 30) scale(" + scaling + ")")
+							.call(axis);
+		}
+
+		window.onload = function() {
+			generateData();
+			update();
+		}
+
+	</script>
+	
+</body>
+</html>

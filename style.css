@@ -39,7 +39,7 @@ body {
 	height: 100%;
 }
 
-svg {
+svg#shape {
 	display: block;
 	height: 100%;
 	width: 100%;
