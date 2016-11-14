@@ -6,28 +6,26 @@
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 	<link rel="stylesheet" href="style.css">
 </head>
-<body>
-	<div class="hbox">
-		<div id="left" class="vbox">
-			<button class="shape" onclick="drawCircle()">Circle</button>
-			<button class="shape" onclick="drawPolygon(6)">Hexagon</button>
-			<button class="shape" onclick="drawPolygon(5)">Pentagon</button>
-			<button class="shape" onclick="drawPolygon(4)">Square</button>
-			<button class="shape" onclick="drawPolygon(3)">Triangle</button>
-		</div>
-		<div id="graph" class="vbox">
-			<h1>Shapes!</h1>
-			<svg>
-				
-			</svg>
-		</div>
-		<div id="right" class="vbox">
-			<button class="colour" onclick="changeColour('red')">Red</button>
-			<button class="colour" onclick="changeColour('yellow')">Yellow</button>
-			<button class="colour" onclick="changeColour('blue')">Blue</button>
-			<button class="colour" onclick="changeColour('green')">Green</button>
-			<button class="colour" onclick="changeColour('black')">Black</button>
-		</div>
+<body class="hbox">
+	<div id="left" class="vbox">
+		<button class="shape" onclick="drawCircle()">Circle</button>
+		<button class="shape" onclick="drawPolygon(6)">Hexagon</button>
+		<button class="shape" onclick="drawPolygon(5)">Pentagon</button>
+		<button class="shape" onclick="drawPolygon(4)">Square</button>
+		<button class="shape" onclick="drawPolygon(3)">Triangle</button>
+	</div>
+	<div id="graph" class="vbox">
+		<h1>SHAPES</h1>
+		<svg>
+			
+		</svg>
+	</div>
+	<div id="right" class="vbox">
+		<button class="colour" onclick="changeColour('red')">Red</button>
+		<button class="colour" onclick="changeColour('yellow')">Yellow</button>
+		<button class="colour" onclick="changeColour('blue')">Blue</button>
+		<button class="colour" onclick="changeColour('green')">Green</button>
+		<button class="colour" onclick="changeColour('black')">Black</button>
 	</div>
 
 	<script>
