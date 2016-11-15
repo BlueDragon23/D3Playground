@@ -42,7 +42,7 @@
 		}
 
 
-		function update() {
+		function draw() {
 			var padding = 20;
 			svg.attr("width", width)
 				.attr("height", height);
@@ -83,14 +83,14 @@
 			var container = document.getElementById("graph");
 			width = container.clientWidth;
 			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
-			update();
+			draw();
 		}
 
 		window.onresize = function() {
 			var container = document.getElementById("graph");
 			width = container.clientWidth;
 			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
-			update();
+			draw();
 		}
 
 	</script>

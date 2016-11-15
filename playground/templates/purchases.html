@@ -3,19 +3,162 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Purchases</title>
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+	<link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-	<div class="hbox">
-		<h1>Purchases</h1>
-		<svg></svg>
+	<div class="hbox" style="height:100%;">
+		<div id="graph" class="vbox">
+			<h1>Purchases</h1>
+			<svg id="purchases"></svg>
+		</div>
+		<div class="vbox">
+			<h1>Cumulative Purchases</h1>
+			<svg id="cumulative"></svg>
+		</div>
 	</div>
 
 	<script>
-		
+		var width = 200;
+		var height = 200;
+		var svgPurchases = d3.select("#purchases");
+		var svgCumulative = d3.select("#cumulative");
+
+
+		var data = [];
+
+		function chooseColour(d) {
+			switch (d) {
+				case "Rewe":
+					return "red";
+				case "Aldi":
+					return "blue";
+				case "Poco":
+					return "brown";
+				default:
+					return "black";
+			}
+		}
+
+		function draw() {
+			drawScatter();
+			drawCumulative();
+		}
+
+		function drawScatter() {
+			var padding = 50;
+			svgPurchases.attr("width", width)
+				.attr("height", height);
+
+			// Scaling
+			var scaleX = d3.scaleTime().domain([data[0]["date"],data[data.length-1]["date"]])
+										.range([padding, width-padding]);
+			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d["cost"]})]).range([height-padding, padding]);
+
+			var circles = svgPurchases.selectAll("circle").data(data);
+			circles.enter().append("circle");
+			circles.exit().remove();
+			svgPurchases.selectAll("circle").attr('cx', function(d) {return scaleX(d["date"])})
+				.attr('cy', function(d) {return scaleY(d["cost"])})
+				.attr('r', padding/5)
+				.attr('fill', function(d) {return chooseColour(d["store"])});
+			var axisY = d3.axisLeft(scaleY);
+			var axisX = d3.axisBottom(scaleX);
+			svgPurchases.selectAll("g").remove();
+			svgPurchases.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ", 0)")
+				.call(axisY)
+			svgPurchases.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (height-padding) + ")")
+				.call(axisX);
+		}
+
+		function drawCumulative() {
+			var padding = 50;
+			svgCumulative.attr("width", width)
+				.attr("height", height);
+
+			// Scaling
+			var scaleX = d3.scaleTime().domain([data[0]["date"],data[data.length-1]["date"]])
+										.range([padding, width-padding]);
+			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d["cumul"]})]).range([height-padding, padding]);
+
+			var bars = svgCumulative.selectAll("rect").data(data);
+			bars.enter().append("rect");
+			bars.exit().remove();
+			svgCumulative.selectAll("rect").attr('x', function(d) {return scaleX(d["date"])})
+				.attr('y', function(d) {return scaleY(d["cumul"])})
+				.attr('height', function(d) {return height - scaleY(d["cumul"]) - padding})
+				.attr('width', width/data.length - padding/2)
+				.attr('fill', function(d) {return chooseColour(d["store"])});
+			var axisY = d3.axisLeft(scaleY);
+			var axisX = d3.axisBottom(scaleX);
+			svgCumulative.selectAll("g").remove();
+			svgCumulative.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ", 0)")
+				.call(axisY)
+			svgCumulative.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (height-padding) + ")")
+				.call(axisX);
+		}
+
+
+		function outerHeight(el) {
+			// Taken from youmightnotneedjquery.com
+			var height = el.offsetHeight;
+		  	var style = getComputedStyle(el);
+
+		  	height += parseInt(style.marginTop) + parseInt(style.marginBottom);
+		  	return height;
+		}
 
 		window.onload = function() {
-			// have variable 'purchases' from backend
+			var parseTime = d3.timeParse("%-d/%-m/%Y");
+			var dates = []
+			{% for date in dates %}
+			dates.push(parseTime("{{date}}"));
+			{% endfor %}
+			var costs = []
+			{% for cost in costs %}
+			costs.push(parseFloat("{{cost}}"));
+			{% endfor %}
+			var stores = []
+			{% for store in stores %}
+			stores.push("{{store}}");
+			{% endfor %}
+			data.push({
+				"date": dates[0],
+				"cost": costs[0],
+				"store": stores[0],
+				"cumul": costs[0]
+			});
+			for (var i = 1; i < dates.length; i++) {
+				data.push({
+					"date": dates[i],
+					"cost": costs[i],
+					"store": stores[i],
+					"cumul": data[i-1]["cumul"] + costs[i]
+				});
+			}
+
+			// Size graph based on screen size
+			var container = document.getElementById("graph");
+			width = container.clientWidth;
+			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
+			draw();
 		}
+
+		window.onresize = function() {
+			var container = document.getElementById("graph");
+			width = container.clientWidth;
+			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
+			draw();
+		}
+
 	</script>
 </body>
 </html>

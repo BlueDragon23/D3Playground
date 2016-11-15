@@ -27,7 +27,9 @@ def show_charts():
 @app.route('/purchases')
 def show_purchases():
     purchases = load_purchases()
-    return render_template('purchases.html', purchases=purchases)
+    return render_template('purchases.html', dates=list(purchases["Date"].values),
+                           costs=list(purchases["Purchase Amount"].values),
+                           stores=list(purchases["Store"].values))
 
 
 if __name__ == "__main__":
