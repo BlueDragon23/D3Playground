@@ -7,14 +7,17 @@
 	<link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-	<div class="hbox">
-		<div class="vbox" style="position:absolute;left:25vw;">
+	<div class="hbox" style="height:100%;">
+		<div id="graph" class="vbox" style="position:relative;left:10vw;width:80vw;">
 			<h1>CHARTS</h1>
-			<svg ></svg>
+			<svg></svg>
 		</div>
 	</div>
 
 	<script type="text/javascript">
+		var width = 200;
+		var height = 200;
+		var svg = d3.select("svg");
 		// Generate random data to display
 		var data;
 		function generateData() {
@@ -38,24 +41,55 @@
 			}
 		}
 
-		var scaling = 20;
+
 		function update() {
-			var circles = d3.select("svg").selectAll("circle").data(data);
-			circles.enter().append("circle")
-				.attr('cx', function(d) {return scaling*d[0] + 30})
-				.attr('cy', function(d) {return scaling*d[1] + 30})
-				.attr('r', scaling/2);
+			var padding = 20;
+			svg.attr("width", width)
+				.attr("height", height);
+			var scaleX = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d[0]})]).range([padding, width-padding]);
+			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d[1]})]).range([height-padding, padding]);
+			var circles = svg.selectAll("circle").data(data);
+			circles.enter().append("circle");
 			circles.exit().remove();
-			var axis = d3.axisLeft(d3.scaleLinear().domain([1, 10]).range([1, 10])).ticks(10);
-			d3.select("svg").attr("width", scaling*data.reduce(function (max, point) {return Math.max(max, point[0])}, 0) + 120)
-							.attr("height", scaling*data.reduce(function (max, point) {return Math.max(max, point[1])}, 0) + 60)
-							.append("g")
-							.attr("transform", "translate(30, 30) scale(" + scaling + ")")
-							.call(axis);
+			svg.selectAll("circle").attr('cx', function(d) {return scaleX(d[0])})
+				.attr('cy', function(d) {return scaleY(d[1])})
+				.attr('r', padding/2);
+			var axisY = d3.axisLeft(scaleY);
+			var axisX = d3.axisBottom(scaleX);
+			svg.selectAll("g").remove();
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ", 0)")
+				.call(axisY)
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (height-padding) + ")")
+				.call(axisX);
 		}
+
+		function outerHeight(el) {
+			// Taken from youmightnotneedjquery.com
+			var height = el.offsetHeight;
+		  	var style = getComputedStyle(el);
+
+		  	height += parseInt(style.marginTop) + parseInt(style.marginBottom);
+		  	return height;
+		}
+
+
 
 		window.onload = function() {
 			generateData();
+			var container = document.getElementById("graph");
+			width = container.clientWidth;
+			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
+			update();
+		}
+
+		window.onresize = function() {
+			var container = document.getElementById("graph");
+			width = container.clientWidth;
+			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
 			update();
 		}
 
