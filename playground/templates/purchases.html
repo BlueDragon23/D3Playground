@@ -8,14 +8,23 @@
 </head>
 <body>
 	<div class="hbox" style="height:100%;">
-		<div id="graph" class="vbox">
-			<h1>Purchases</h1>
-			<svg id="purchases"></svg>
-		</div>
 		<div class="vbox">
-			<h1>Cumulative Purchases</h1>
-			<svg id="cumulative"></svg>
+			<div class="hbox" id="controls" style="width: auto;">
+				<!-- Display controls for the graphs -->
+
+			</div>
+			<div class="hbox" style="height:100%;">
+				<div id="graph" class="vbox">
+					<h1>Purchases</h1>
+					<svg id="purchases"></svg>
+				</div>
+				<div class="vbox">
+					<h1>Cumulative Purchases</h1>
+					<svg id="cumulative"></svg>
+				</div>
+			</div>
 		</div>
+		
 	</div>
 
 	<script>
@@ -24,8 +33,8 @@
 		var svgPurchases = d3.select("#purchases");
 		var svgCumulative = d3.select("#cumulative");
 
-
 		var data = [];
+		var checked = {}
 
 		function chooseColour(d) {
 			switch (d) {
@@ -45,6 +54,28 @@
 			drawCumulative();
 		}
 
+		function filterChecks() {
+			console.log("Enter filter");
+			var checkboxes = d3.select("#controls").selectAll("label").select("input");
+			checkboxes.each(function(d) {checked[d] = d3.select(this).property("checked")});
+			draw();
+			console.log("Exit filter");
+		}
+
+		function filtering(d) {
+			console.log(checked[d["store"]]);
+			return checked[d["store"]];
+		}
+
+		function updateData() {
+			var allData = svgPurchases.selectAll("circle").data(data);
+			var filtered = allData.filter(filtering);
+			console.log(allData, filtered);
+			svgPurchases.selectAll("circle").data(data).filter(filter).enter().append("circle").exit().remove();
+			svgCumulative.selectAll("rect").data(data).filter(filter).enter().append("rect").exit().remove();
+		}
+
+
 		function drawScatter() {
 			var padding = 50;
 			svgPurchases.attr("width", width)
@@ -55,10 +86,11 @@
 										.range([padding, width-padding]);
 			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d["cost"]})]).range([height-padding, padding]);
 
-			var circles = svgPurchases.selectAll("circle").data(data);
-			circles.enter().append("circle");
+			var circles = svgPurchases.selectAll("circle").data(data.filter(function(d) {return filtering(d);}));
 			circles.exit().remove();
-			svgPurchases.selectAll("circle").attr('cx', function(d) {return scaleX(d["date"])})
+
+			circles.enter().append("circle").merge(circles)
+				.attr('cx', function(d) {return scaleX(d["date"])})
 				.attr('cy', function(d) {return scaleY(d["cost"])})
 				.attr('r', padding/5)
 				.attr('fill', function(d) {return chooseColour(d["store"])});
@@ -85,10 +117,10 @@
 										.range([padding, width-padding]);
 			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d["cumul"]})]).range([height-padding, padding]);
 
-			var bars = svgCumulative.selectAll("rect").data(data);
-			bars.enter().append("rect");
+			var bars = svgCumulative.selectAll("rect").data(data.filter(function(d) {return filtering(d);}));
 			bars.exit().remove();
-			svgCumulative.selectAll("rect").attr('x', function(d) {return scaleX(d["date"])})
+
+			bars.enter().append("rect").merge(bars).attr('x', function(d) {return scaleX(d["date"])})
 				.attr('y', function(d) {return scaleY(d["cumul"])})
 				.attr('height', function(d) {return height - scaleY(d["cumul"]) - padding})
 				.attr('width', width/data.length - padding/2)
@@ -144,11 +176,23 @@
 					"cumul": data[i-1]["cumul"] + costs[i]
 				});
 			}
+			allData = data;
 
 			// Size graph based on screen size
 			var container = document.getElementById("graph");
 			width = container.clientWidth;
 			height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
+
+			console.log(d3.set(stores));
+			d3.select("#controls").selectAll("label")
+				.data(d3.set(stores).values()).enter().append("label")
+				.html(function(d) {return d})
+				.append("input")
+				.attr("type", "checkbox")
+				.attr("name", function(d) {return d})
+				.attr("checked", "checked")
+				.attr("onclick", function(d) {return "filterChecks()"});
+			filterChecks();
 			draw();
 		}
 

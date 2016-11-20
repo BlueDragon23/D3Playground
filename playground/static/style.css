@@ -12,6 +12,8 @@
 .hbox {
 	display: flex;
 	flex-direction: row;
+	text-align: center;
+	margin: auto;
 }
 
 body {
