@@ -112,17 +112,22 @@
 			svgCumulative.attr("width", width)
 				.attr("height", height);
 
+			var filteredData = data.filter(filtering);
+			var accumulation = filteredData.length > 0 ? [filteredData[0]["cost"]] : [];
+			for (var i = 1; i < filteredData.length; i++) {
+				accumulation[i] = accumulation[i-1] + filteredData[i]["cost"];
+			}
 			// Scaling
-			var scaleX = d3.scaleTime().domain([data[0]["date"],data[data.length-1]["date"]])
+			var scaleX = d3.scaleTime().domain([data[0]["date"], data[data.length-1]["date"]])
 										.range([padding, width-padding]);
-			var scaleY = d3.scaleLinear().domain([0, d3.max(data, function(d) {return d["cumul"]})]).range([height-padding, padding]);
+			var scaleY = d3.scaleLinear().domain([0, d3.sum(data, function(d) {return d["cost"]})]).range([height-padding, padding]);
 
-			var bars = svgCumulative.selectAll("rect").data(data.filter(function(d) {return filtering(d);}));
+			var bars = svgCumulative.selectAll("rect").data(filteredData);
 			bars.exit().remove();
 
 			bars.enter().append("rect").merge(bars).attr('x', function(d) {return scaleX(d["date"])})
-				.attr('y', function(d) {return scaleY(d["cumul"])})
-				.attr('height', function(d) {return height - scaleY(d["cumul"]) - padding})
+				.attr('y', function(d, i) {return scaleY(accumulation[i])})
+				.attr('height', function(d, i) {return height - scaleY(accumulation[i]) - padding})
 				.attr('width', width/data.length - padding/2)
 				.attr('fill', function(d) {return chooseColour(d["store"])});
 			var axisY = d3.axisLeft(scaleY);
@@ -162,18 +167,11 @@
 			{% for store in stores %}
 			stores.push("{{store}}");
 			{% endfor %}
-			data.push({
-				"date": dates[0],
-				"cost": costs[0],
-				"store": stores[0],
-				"cumul": costs[0]
-			});
-			for (var i = 1; i < dates.length; i++) {
+			for (var i = 0; i < dates.length; i++) {
 				data.push({
 					"date": dates[i],
 					"cost": costs[i],
-					"store": stores[i],
-					"cumul": data[i-1]["cumul"] + costs[i]
+					"store": stores[i]
 				});
 			}
 			allData = data;
