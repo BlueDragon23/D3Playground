@@ -30,6 +30,7 @@
 	<script>
 		var width = 200;
 		var height = 200;
+		let padding = 100;
 		var svgPurchases = d3.select("#purchases");
 		var svgCumulative = d3.select("#cumulative");
 
@@ -75,9 +76,41 @@
 			svgCumulative.selectAll("rect").data(data).filter(filter).enter().append("rect").exit().remove();
 		}
 
+		function addAxis(parent, scaleX, scaleY) {
+			var axisY = d3.axisLeft(scaleY);
+			var axisX = d3.axisBottom(scaleX);
+
+			parent.selectAll("g").remove();
+			parent.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + padding + ", 0)")
+				.call(axisY)
+			parent.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (height-padding) + ")")
+				.call(axisX);
+		}
+
+		function addAxisLabels(parent, xName, yName) {
+			parent.selectAll("text").filter(function(d) {return d.attr("class") == "label"}).remove();
+			parent.append("text")
+				.text(xName)
+				.attr("x", "" + width/2)
+				.attr("y", "" + (height - padding/2))
+				.attr("text-anchor", "middle")
+				.attr("class", "label");
+
+			parent.append("text")
+				.text(yName)
+				.attr("transform", "rotate(-90, " + padding/2 + ", " + height/2 + ")")
+				.attr("x", "" + padding/2)
+				.attr("y", "" + height/2)
+				.attr("text-anchor", "middle")
+				.attr("class", "label");
+		}
+
 
 		function drawScatter() {
-			var padding = 50;
 			svgPurchases.attr("width", width)
 				.attr("height", height);
 
@@ -92,23 +125,15 @@
 			circles.enter().append("circle").merge(circles)
 				.attr('cx', function(d) {return scaleX(d["date"])})
 				.attr('cy', function(d) {return scaleY(d["cost"])})
-				.attr('r', padding/5)
+				.attr('r', padding/10)
 				.attr('fill', function(d) {return chooseColour(d["store"])});
-			var axisY = d3.axisLeft(scaleY);
-			var axisX = d3.axisBottom(scaleX);
-			svgPurchases.selectAll("g").remove();
-			svgPurchases.append("g")
-				.attr("class", "axis")
-				.attr("transform", "translate(" + padding + ", 0)")
-				.call(axisY)
-			svgPurchases.append("g")
-				.attr("class", "axis")
-				.attr("transform", "translate(0," + (height-padding) + ")")
-				.call(axisX);
+
+			addAxisLabels(svgPurchases, "Date", "Cost");
+
+			addAxis(svgPurchases, scaleX, scaleY);
 		}
 
 		function drawCumulative() {
-			var padding = 50;
 			svgCumulative.attr("width", width)
 				.attr("height", height);
 
@@ -128,19 +153,12 @@
 			bars.enter().append("rect").merge(bars).attr('x', function(d) {return scaleX(d["date"])})
 				.attr('y', function(d, i) {return scaleY(accumulation[i])})
 				.attr('height', function(d, i) {return height - scaleY(accumulation[i]) - padding})
-				.attr('width', width/data.length - padding/2)
+				.attr('width', width/data.length - padding/4)
 				.attr('fill', function(d) {return chooseColour(d["store"])});
-			var axisY = d3.axisLeft(scaleY);
-			var axisX = d3.axisBottom(scaleX);
-			svgCumulative.selectAll("g").remove();
-			svgCumulative.append("g")
-				.attr("class", "axis")
-				.attr("transform", "translate(" + padding + ", 0)")
-				.call(axisY)
-			svgCumulative.append("g")
-				.attr("class", "axis")
-				.attr("transform", "translate(0," + (height-padding) + ")")
-				.call(axisX);
+
+			addAxisLabels(svgCumulative, "Date", "Cumulative Cost");
+
+			addAxis(svgCumulative, scaleX, scaleY);
 		}
 
 
