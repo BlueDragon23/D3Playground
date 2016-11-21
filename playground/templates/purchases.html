@@ -65,7 +65,9 @@
 		}
 
 		function filtering(d) {
-			return checked[d["store"]];
+			return checked[d["store"]] && 
+				d3.select("#costRangeMin").property("value") <= d["cost"] &&
+				d["cost"] <= d3.select("#costRangeMax").property("value");
 		}
 
 		function updateData() {
@@ -208,12 +210,15 @@
 				.attr("name", function(d) {return d})
 				.attr("checked", "checked")
 				.attr("onclick", function(d) {return "filterChecks()"});
+			var maxCost = d3.max(data, function(d) {return data["cost"]});
 			d3.select("#costRangeMin")
-				.attr("max", max(data, function(d) {return data["cost"]}))
-				.attr("min", 0);
+				.attr("max", maxCost)
+				.attr("min", 0)
+				.property("value", 0);
 			d3.select("#costRangeMax")
-				.attr("max", max(data, function(d) {return data["cost"]}))
-				.attr("min", 0);
+				.attr("max", maxCost)
+				.attr("min", 0)
+				.property("value", maxCost);
 			filterChecks();
 			draw();
 		}
