@@ -64,7 +64,6 @@
 		}
 
 		function filtering(d) {
-			console.log(checked[d["store"]]);
 			return checked[d["store"]];
 		}
 
@@ -92,7 +91,7 @@
 		}
 
 		function addAxisLabels(parent, xName, yName) {
-			parent.selectAll("text").filter(function(d) {return d.attr("class") == "label"}).remove();
+			parent.selectAll("text").filter(function() {return d3.select(this).attr("class") == "label"}).remove();
 			parent.append("text")
 				.text(xName)
 				.attr("x", "" + width/2)
