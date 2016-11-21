@@ -11,7 +11,8 @@
 		<div class="vbox">
 			<div class="hbox" id="controls" style="width: auto;">
 				<!-- Display controls for the graphs -->
-				<input type="range" name="Cost" id="costRange">
+				<input type="range" name="Cost" id="costRangeMin">
+				<input type="range" name="Cost" id="costRangeMax">
 			</div>
 			<div class="hbox" style="height:100%;">
 				<div id="graph" class="vbox">
@@ -207,7 +208,10 @@
 				.attr("name", function(d) {return d})
 				.attr("checked", "checked")
 				.attr("onclick", function(d) {return "filterChecks()"});
-			d3.select("#costRange")
+			d3.select("#costRangeMin")
+				.attr("max", max(data, function(d) {return data["cost"]}))
+				.attr("min", 0);
+			d3.select("#costRangeMax")
 				.attr("max", max(data, function(d) {return data["cost"]}))
 				.attr("min", 0);
 			filterChecks();
