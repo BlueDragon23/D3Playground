@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Purchases</title>
+	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+	<link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+	<!-- General design is a fixed position sidebar containing all of the filtering controls.
+		All of the graphs can then be displayed on the right, as a scrollable element -->
+	<div id="sidebar">
+		<div class="vbox" id="controls">
+			<h1>Controls</h1>
+			<input type="range" name="Cost" id="costRangeMin">
+			<input type="range" name="Cost" id="costRangeMax">
+
+		</div>
+	</div>
+	<div class="vbox" id="graph" style="position: absolute; right:0px; top: 0px; width: 80%;">
+		<div class="vbox">
+			<h1></h1>
+			<svg id="purchases"></svg>
+		</div>
+		<div class="vbox">
+			<h1></h1>
+			<svg id="cumulative"></svg>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="../static/purchases.js"></script>
+	<script>
+		window.onload = function() {
+		    var parseTime = d3.timeParse("%-d/%-m/%Y");
+		    var dates = []
+		    {% for date in dates %}
+		    dates.push(parseTime("{{date}}"));
+		    {% endfor %}
+		    var costs = []
+		    {% for cost in costs %}
+		    costs.push(parseFloat("{{cost}}"));
+		    {% endfor %}
+		    var stores = []
+		    {% for store in stores %}
+		    stores.push("{{store}}");
+		    {% endfor %}
+		    for (var i = 0; i < dates.length; i++) {
+		        data.push({
+		            "date": dates[i],
+		            "cost": costs[i],
+		            "store": stores[i]
+		        });
+		    }
+		    allData = data;
+
+		    // Size graph based on screen size
+		    var container = document.getElementById("graph");
+		    width = container.clientWidth;
+    		height = container.clientHeight - outerHeight(document.getElementsByTagName("h1")[0]);
+
+		    console.log(d3.set(stores));
+		    d3.select("#controls").selectAll("label")
+		        .data(d3.set(stores).values()).enter().append("label")
+		        .html(function(d) {return d})
+		        .append("input")
+		        .attr("type", "checkbox")
+		        .attr("name", function(d) {return d})
+		        .attr("checked", "checked")
+		        .attr("onclick", function(d) {return "filterChecks()"});
+		    var maxCost = d3.max(data, function(d) {return d["cost"]});
+		    d3.select("#costRangeMin")
+		        .property("max", maxCost)
+		        .property("min", 0)
+		        .attr("oninput", "draw()")
+		        .property("value", 0);
+		    d3.select("#costRangeMax")
+		        .property("max", maxCost)
+		        .property("min", 0)
+		        .attr("oninput", "draw()")
+		        .property("value", maxCost);
+		    filterChecks();
+		    draw();
+		}
+	</script>
+</body>
+</html>

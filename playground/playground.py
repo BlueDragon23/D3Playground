@@ -31,6 +31,13 @@ def show_purchases():
                            costs=list(purchases["Purchase Amount"].values),
                            stores=list(purchases["Store"].values))
 
+@app.route('/purchases-dev')
+def show_purchases_dev():
+    purchases = load_purchases()
+    return render_template('purchases2.html', dates=list(purchases["Date"].values),
+                           costs=list(purchases["Purchase Amount"].values),
+                           stores=list(purchases["Store"].values))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

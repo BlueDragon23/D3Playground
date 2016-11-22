@@ -37,6 +37,16 @@ body {
 	height: 100%;
 }
 
+#sidebar {
+	position: static;
+	right: 10px;
+	top: 10px;
+	height: 100%;
+	width: 15%;
+	background-color: grey;
+	padding: 10px;
+}
+
 .shape,.colour {
 	height: 100%;
 }
